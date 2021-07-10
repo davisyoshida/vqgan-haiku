@@ -1,0 +1,3 @@
+[submodule "vqgan/vgg"]
+	path = submodules/vgg
+	url = https://github.com/davisyoshida/vgg16-haiku
