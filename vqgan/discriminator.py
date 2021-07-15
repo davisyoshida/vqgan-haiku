@@ -4,7 +4,7 @@ import haiku as hk
 import jax
 import jax.numpy as jnp
 
-from .utils import hk_init_context, make_conv, maybe_hk_dropout, PmeanBatchNormWithoutState, torch_conv_kernel_to_hk
+from .utils import make_conv, maybe_hk_dropout, PmeanBatchNormWithoutState, torch_conv_kernel_to_hk
 
 def load_lpips(config, vgg_func, vgg_params, weights_location='weights/lpips.pkl'):
     with open(weights_location, 'rb') as f:
@@ -111,8 +111,7 @@ def make_discriminator(config):
         return NLayerDiscriminator()(x)
 
     model = hk.transform(discriminator)
-    with hk_init_context():
-        params = model.init(jax.random.PRNGKey(0), jnp.zeros((3, config.resolution, config.resolution)))
+    params = model.init(jax.random.PRNGKey(0), jnp.zeros((3, config.resolution, config.resolution)))
     return model, params
 
 def normalize_tensor(x):

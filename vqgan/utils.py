@@ -1,7 +1,4 @@
 """Various things copied from my personal utils repo"""
-from contextlib import contextmanager
-from contextvars import ContextVar
-
 import haiku as hk
 import jax
 import jax.numpy as jnp
@@ -73,15 +70,6 @@ def make_conv(*args, in_channels, **kwargs):
 
     return hk.Conv2D(*args, **kwargs)
 
-_in_init = ContextVar('hk_init', default=False)
-@contextmanager
-def hk_init_context():
-    token = _in_init.set(True)
-    try:
-        yield
-    finally:
-        _in_init.reset(token)
-
 class PmeanBatchNormWithoutState(hk.Module):
     def __init__(self, axis_name='batch', name='bn'):
         super().__init__(name=name)
@@ -90,7 +78,7 @@ class PmeanBatchNormWithoutState(hk.Module):
     def __call__(self, x):
         offset = hk.get_parameter('bn_offset', shape=(x.shape[0],), init=hk.initializers.Constant(0.))
         scale = hk.get_parameter('bn_scale', shape=(x.shape[0],), init=hk.initializers.Constant(1.))
-        if _in_init.get():
+        if hk.running_init():
             mean = jnp.zeros(x.shape[0])
             variance = jnp.zeros(x.shape[0])
         else:
